@@ -40,7 +40,7 @@ jobs:
       - name: "Run static analysis"
         run: python manage.py check types
 
-      - name: "Run tests"
+      - name: "Run unit tests"
         run: |
           echo "${{ secrets.ENV_TEST_FILE }}" > .env.test
           python manage.py check tests test

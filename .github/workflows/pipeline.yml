@@ -14,9 +14,9 @@ jobs:
       db:
         image: postgres
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: challenge_4id_docker
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -41,10 +41,14 @@ jobs:
         run: python manage.py check types
 
       - name: "Run tests"
-        run: python manage.py check tests test
+        run: |
+          echo "${{ secrets.ENV_TEST_FILE }}" > .env.test
+          python manage.py check tests test
 
       - name: "Run style analysis"
         run: python manage.py check style
 
       - name: "Run migration tests"
-        run: python manage.py db migrate test
+        run: |
+          echo "${{ secrets.ENV_TEST_FILE }}" > .env.test
+          python manage.py db migrate test

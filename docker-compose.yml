@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: bash -c "
+      echo 'Running style, types, tests checking...' &&
+      echo 'Running migrations...' &&
+      python manage.py check style &&
+      python manage.py check types &&
+      python manage.py check tests &&
+      python manage.py db migrate &&
+      echo 'Running web server...' &&
+      python manage.py prod --port 5000"
+    volumes:
+      - .:/app
+    ports:
+      - '5000:5000'
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=challenge_4id_docker
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
